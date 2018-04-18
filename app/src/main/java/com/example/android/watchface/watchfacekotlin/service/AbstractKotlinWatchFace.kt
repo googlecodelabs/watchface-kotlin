@@ -14,29 +14,24 @@
  * limitations under the License.
  */
 
-package com.example.android.watchface.watchfacekotlin
+package com.example.android.watchface.watchfacekotlin.service
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
-import android.support.v7.graphics.Palette
 import android.support.wearable.watchface.CanvasWatchFaceService
 import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
 import android.view.SurfaceHolder
-import android.widget.Toast
+import com.example.android.watchface.watchfacekotlin.model.AnalogWatchFaceStyle
 
 import java.lang.ref.WeakReference
 import java.util.Calendar
@@ -53,15 +48,11 @@ private const val INTERACTIVE_UPDATE_RATE_MS = 1000
  */
 private const val MSG_UPDATE_TIME = 0
 
-private const val HOUR_STROKE_WIDTH = 5f
-private const val MINUTE_STROKE_WIDTH = 3f
-private const val SECOND_TICK_STROKE_WIDTH = 2f
-
-private const val CENTER_GAP_AND_CIRCLE_RADIUS = 4f
-
-private const val SHADOW_RADIUS = 6f
-
 /**
+ * This is a helper class which renders an analog watch face based on a data object passed in
+ * representing the style. The class implements all best practices for watch faces, so the
+ * developer can just focus on designing the watch face they want.
+ *
  * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't
  * shown. On devices with low-bit ambient mode, the hands are drawn without anti-aliasing in ambient
  * mode. The watch face is drawn with less contrast in mute mode.
@@ -74,14 +65,19 @@ private const val SHADOW_RADIUS = 6f
  * in the Google Watch Face Code Lab:
  * https://codelabs.developers.google.com/codelabs/watchface/index.html#0
  */
-class KotlinWatchFace : CanvasWatchFaceService() {
+abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
+
+    private lateinit var analogWatchFaceStyle: AnalogWatchFaceStyle
+
+    abstract fun getWatchFaceStyle():AnalogWatchFaceStyle
 
     override fun onCreateEngine(): Engine {
         return Engine()
     }
 
-    private class EngineHandler(reference: KotlinWatchFace.Engine) : Handler() {
-        private val weakReference: WeakReference<KotlinWatchFace.Engine> = WeakReference(reference)
+    private class EngineHandler(reference: AbstractKotlinWatchFace.Engine) : Handler() {
+        private val weakReference: WeakReference<AbstractKotlinWatchFace.Engine> =
+            WeakReference(reference)
 
         override fun handleMessage(msg: Message) {
             val engine = weakReference.get()
@@ -102,14 +98,9 @@ class KotlinWatchFace : CanvasWatchFaceService() {
         private var centerX: Float = 0F
         private var centerY: Float = 0F
 
-        private var secondHandLength: Float = 0F
-        private var minuteHandLength: Float = 0F
-        private var hourHandLength: Float = 0F
-
-        /* Colors for all hands (hour, minute, seconds, ticks) based on photo loaded. */
-        private var watchHandColor: Int = 0
-        private var watchHandHighlightColor: Int = 0
-        private var watchHandShadowColor: Int = 0
+        private var secondHandLengthRatio: Float = 0F
+        private var minuteHandLengthRatio: Float = 0F
+        private var hourHandLengthRatio: Float = 0F
 
         private lateinit var hourPaint: Paint
         private lateinit var minutePaint: Paint
@@ -117,8 +108,12 @@ class KotlinWatchFace : CanvasWatchFaceService() {
         private lateinit var tickAndCirclePaint: Paint
 
         private lateinit var backgroundPaint: Paint
+
+        // TODO (jewalker): Add back in followup CL
+        /*
         private lateinit var backgroundBitmap: Bitmap
         private lateinit var grayBackgroundBitmap: Bitmap
+        */
 
         private var ambient: Boolean = false
         private var lowBitAmbient: Boolean = false
@@ -137,8 +132,10 @@ class KotlinWatchFace : CanvasWatchFaceService() {
         override fun onCreate(holder: SurfaceHolder) {
             super.onCreate(holder)
 
+            analogWatchFaceStyle = getWatchFaceStyle()
+
             setWatchFaceStyle(
-                    WatchFaceStyle.Builder(this@KotlinWatchFace)
+                    WatchFaceStyle.Builder(this@AbstractKotlinWatchFace)
                         .setAcceptsTapEvents(true)
                         .build()
             )
@@ -153,9 +150,11 @@ class KotlinWatchFace : CanvasWatchFaceService() {
             backgroundPaint = Paint().apply {
                 color = Color.BLACK
             }
+
+            /* TODO (jewalker): Add back in followup CL.
             backgroundBitmap = BitmapFactory.decodeResource(resources, R.drawable.bg)
 
-            /* Extracts colors from background image to improve watchface style. */
+            *//* Extracts colors from background image to improve watchface style. *//*
             Palette.from(backgroundBitmap).generate {
                 it.let {
                     watchHandHighlightColor = it.getVibrantColor(Color.RED)
@@ -164,51 +163,60 @@ class KotlinWatchFace : CanvasWatchFaceService() {
                     updateWatchHandStyle()
                 }
             }
+            */
         }
 
         private fun initializeWatchFace() {
-            /* Set defaults for colors */
-            watchHandColor = Color.WHITE
-            watchHandHighlightColor = Color.RED
-            watchHandShadowColor = Color.BLACK
 
             hourPaint = Paint().apply {
-                color = watchHandColor
-                strokeWidth = HOUR_STROKE_WIDTH
+                color = analogWatchFaceStyle.watchFaceColors.main
+                strokeWidth = analogWatchFaceStyle.watchFaceDimensions.hourHandWidth
                 isAntiAlias = true
                 strokeCap = Paint.Cap.ROUND
                 setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, watchHandShadowColor
+                        analogWatchFaceStyle.watchFaceDimensions.shadowRadius,
+                        0f,
+                        0f,
+                        analogWatchFaceStyle.watchFaceColors.shadow
                 )
             }
 
             minutePaint = Paint().apply {
-                color = watchHandColor
-                strokeWidth = MINUTE_STROKE_WIDTH
+                color = analogWatchFaceStyle.watchFaceColors.main
+                strokeWidth = analogWatchFaceStyle.watchFaceDimensions.minuteHandWidth
                 isAntiAlias = true
                 strokeCap = Paint.Cap.ROUND
                 setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, watchHandShadowColor
+                        analogWatchFaceStyle.watchFaceDimensions.shadowRadius,
+                        0f,
+                        0f,
+                        analogWatchFaceStyle.watchFaceColors.shadow
                 )
             }
 
             secondPaint = Paint().apply {
-                color = watchHandHighlightColor
-                strokeWidth = SECOND_TICK_STROKE_WIDTH
+                color = analogWatchFaceStyle.watchFaceColors.highlight
+                strokeWidth = analogWatchFaceStyle.watchFaceDimensions.secondHandWidth
                 isAntiAlias = true
                 strokeCap = Paint.Cap.ROUND
                 setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, watchHandShadowColor
+                        analogWatchFaceStyle.watchFaceDimensions.shadowRadius,
+                        0f,
+                        0f,
+                        analogWatchFaceStyle.watchFaceColors.shadow
                 )
             }
 
             tickAndCirclePaint = Paint().apply {
-                color = watchHandColor
-                strokeWidth = SECOND_TICK_STROKE_WIDTH
+                color = analogWatchFaceStyle.watchFaceColors.main
+                strokeWidth = analogWatchFaceStyle.watchFaceDimensions.secondHandWidth
                 isAntiAlias = true
                 style = Paint.Style.STROKE
                 setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, watchHandShadowColor
+                        analogWatchFaceStyle.watchFaceDimensions.shadowRadius,
+                        0f,
+                        0f,
+                        analogWatchFaceStyle.watchFaceColors.shadow
                 )
             }
         }
@@ -261,10 +269,10 @@ class KotlinWatchFace : CanvasWatchFaceService() {
                 secondPaint.clearShadowLayer()
                 tickAndCirclePaint.clearShadowLayer()
             } else {
-                hourPaint.color = watchHandColor
-                minutePaint.color = watchHandColor
-                secondPaint.color = watchHandHighlightColor
-                tickAndCirclePaint.color = watchHandColor
+                hourPaint.color = analogWatchFaceStyle.watchFaceColors.main
+                minutePaint.color = analogWatchFaceStyle.watchFaceColors.main
+                secondPaint.color = analogWatchFaceStyle.watchFaceColors.highlight
+                tickAndCirclePaint.color = analogWatchFaceStyle.watchFaceColors.main
 
                 hourPaint.isAntiAlias = true
                 minutePaint.isAntiAlias = true
@@ -272,16 +280,28 @@ class KotlinWatchFace : CanvasWatchFaceService() {
                 tickAndCirclePaint.isAntiAlias = true
 
                 hourPaint.setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, watchHandShadowColor
+                        analogWatchFaceStyle.watchFaceDimensions.shadowRadius,
+                        0f,
+                        0f,
+                        analogWatchFaceStyle.watchFaceColors.shadow
                 )
                 minutePaint.setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, watchHandShadowColor
+                        analogWatchFaceStyle.watchFaceDimensions.shadowRadius,
+                        0f,
+                        0f,
+                        analogWatchFaceStyle.watchFaceColors.shadow
                 )
                 secondPaint.setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, watchHandShadowColor
+                        analogWatchFaceStyle.watchFaceDimensions.shadowRadius,
+                        0f,
+                        0f,
+                        analogWatchFaceStyle.watchFaceColors.shadow
                 )
                 tickAndCirclePaint.setShadowLayer(
-                        SHADOW_RADIUS, 0f, 0f, watchHandShadowColor
+                        analogWatchFaceStyle.watchFaceDimensions.shadowRadius,
+                        0f,
+                        0f,
+                        analogWatchFaceStyle.watchFaceColors.shadow
                 )
             }
         }
@@ -314,11 +334,15 @@ class KotlinWatchFace : CanvasWatchFaceService() {
             /*
              * Calculate lengths of different hands based on watch screen size.
              */
-            secondHandLength = (centerX * 0.875).toFloat()
-            minuteHandLength = (centerX * 0.75).toFloat()
-            hourHandLength = (centerX * 0.5).toFloat()
+            secondHandLengthRatio =
+                    (centerX * analogWatchFaceStyle.watchFaceDimensions.secondHandLengthRatio)
+            minuteHandLengthRatio =
+                    (centerX * analogWatchFaceStyle.watchFaceDimensions.minuteHandLengthRatio)
+            hourHandLengthRatio =
+                    (centerX * analogWatchFaceStyle.watchFaceDimensions.hourHandLengthRatio)
 
-            /* Scale loaded background image (more efficient) if surface dimensions change. */
+            /* TODO (jewalker): Add in followup CL (for background image)
+            *//* Scale loaded background image (more efficient) if surface dimensions change. *//*
             val scale = width.toFloat() / backgroundBitmap.width.toFloat()
 
             backgroundBitmap = Bitmap.createScaledBitmap(
@@ -327,7 +351,7 @@ class KotlinWatchFace : CanvasWatchFaceService() {
                     (backgroundBitmap.height * scale).toInt(), true
             )
 
-            /*
+            *//*
              * Create a gray version of the image only if it will look nice on the device in
              * ambient mode. That means we don't want devices that support burn-in
              * protection (slight movements in pixels, not great for images going all the way to
@@ -336,12 +360,15 @@ class KotlinWatchFace : CanvasWatchFaceService() {
              * Also, if your watch face will know about all images ahead of time (users aren't
              * selecting their own photos for the watch face), it will be more
              * efficient to create a black/white version (png, etc.) and load that when you need it.
-             */
+             *//*
             if (!burnInProtection && !lowBitAmbient) {
                 initGrayBackgroundBitmap()
             }
+            */
         }
 
+
+        /* TODO (jewalker): Add in followup CL (background image)
         private fun initGrayBackgroundBitmap() {
             grayBackgroundBitmap = Bitmap.createBitmap(
                     backgroundBitmap.width,
@@ -356,27 +383,7 @@ class KotlinWatchFace : CanvasWatchFaceService() {
             grayPaint.colorFilter = filter
             canvas.drawBitmap(backgroundBitmap, 0f, 0f, grayPaint)
         }
-
-        /**
-         * Captures tap event (and tap type). The [WatchFaceService.TAP_TYPE_TAP] case can be
-         * used for implementing specific logic to handle the gesture.
-         */
-        override fun onTapCommand(tapType: Int, x: Int, y: Int, eventTime: Long) {
-            when (tapType) {
-                WatchFaceService.TAP_TYPE_TOUCH -> {
-                    // The user has started touching the screen.
-                }
-                WatchFaceService.TAP_TYPE_TOUCH_CANCEL -> {
-                    // The user has started a different gesture or otherwise cancelled the tap.
-                }
-                WatchFaceService.TAP_TYPE_TAP ->
-                    // The user has completed the tap gesture.
-                    // TODO: Add code to handle the tap gesture.
-                    Toast.makeText(applicationContext, R.string.message, Toast.LENGTH_SHORT)
-                        .show()
-            }
-            invalidate()
-        }
+        */
 
         override fun onDraw(canvas: Canvas, bounds: Rect) {
             val now = System.currentTimeMillis()
@@ -390,11 +397,17 @@ class KotlinWatchFace : CanvasWatchFaceService() {
 
             if (ambient && (lowBitAmbient || burnInProtection)) {
                 canvas.drawColor(Color.BLACK)
+            } else {
+                canvas.drawColor(analogWatchFaceStyle.watchFaceColors.background)
+            }
+
+            /* TODO (jewalker): add in followup CL
             } else if (ambient) {
                 canvas.drawBitmap(grayBackgroundBitmap, 0f, 0f, backgroundPaint)
             } else {
                 canvas.drawBitmap(backgroundBitmap, 0f, 0f, backgroundPaint)
             }
+            */
         }
 
         private fun drawWatchFace(canvas: Canvas) {
@@ -436,21 +449,25 @@ class KotlinWatchFace : CanvasWatchFaceService() {
              */
             canvas.save()
 
+            val distanceFromCenterToArm =
+                analogWatchFaceStyle.watchFaceDimensions.centerGapAndCircleRadius -
+                        analogWatchFaceStyle.watchFaceDimensions.armToCenterCircleDistance
+
             canvas.rotate(hoursRotation, centerX, centerY)
             canvas.drawLine(
                     centerX,
-                    centerY - CENTER_GAP_AND_CIRCLE_RADIUS,
+                    centerY - distanceFromCenterToArm,
                     centerX,
-                    centerY - hourHandLength,
+                    centerY - hourHandLengthRatio,
                     hourPaint
             )
 
             canvas.rotate(minutesRotation - hoursRotation, centerX, centerY)
             canvas.drawLine(
                     centerX,
-                    centerY - CENTER_GAP_AND_CIRCLE_RADIUS,
+                    centerY - distanceFromCenterToArm,
                     centerX,
-                    centerY - minuteHandLength,
+                    centerY - minuteHandLengthRatio,
                     minutePaint
             )
 
@@ -462,16 +479,16 @@ class KotlinWatchFace : CanvasWatchFaceService() {
                 canvas.rotate(secondsRotation - minutesRotation, centerX, centerY)
                 canvas.drawLine(
                         centerX,
-                        centerY - CENTER_GAP_AND_CIRCLE_RADIUS,
+                        centerY - distanceFromCenterToArm,
                         centerX,
-                        centerY - secondHandLength,
+                        centerY - secondHandLengthRatio,
                         secondPaint
                 )
             }
             canvas.drawCircle(
                     centerX,
                     centerY,
-                    CENTER_GAP_AND_CIRCLE_RADIUS,
+                    analogWatchFaceStyle.watchFaceDimensions.centerGapAndCircleRadius,
                     tickAndCirclePaint
             )
 
@@ -501,7 +518,7 @@ class KotlinWatchFace : CanvasWatchFaceService() {
             }
             registeredTimeZoneReceiver = true
             val filter = IntentFilter(Intent.ACTION_TIMEZONE_CHANGED)
-            this@KotlinWatchFace.registerReceiver(timeZoneReceiver, filter)
+            this@AbstractKotlinWatchFace.registerReceiver(timeZoneReceiver, filter)
         }
 
         private fun unregisterReceiver() {
@@ -509,7 +526,7 @@ class KotlinWatchFace : CanvasWatchFaceService() {
                 return
             }
             registeredTimeZoneReceiver = false
-            this@KotlinWatchFace.unregisterReceiver(timeZoneReceiver)
+            this@AbstractKotlinWatchFace.unregisterReceiver(timeZoneReceiver)
         }
 
         /**
@@ -543,5 +560,3 @@ class KotlinWatchFace : CanvasWatchFaceService() {
         }
     }
 }
-
-
