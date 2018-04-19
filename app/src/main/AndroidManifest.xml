@@ -35,7 +35,7 @@
             android:value="true" />
 
         <service
-            android:name=".service.AbstractKotlinWatchFace"
+            android:name=".AnalogDslWatchFace"
             android:label="@string/my_analog_name"
             android:permission="android.permission.BIND_WALLPAPER">
             <meta-data

@@ -18,5 +18,5 @@
 <resources>
     <string name="app_name">WatchFaceKotlin</string>
     <string name="message">Watch face tapped</string>
-    <string name="my_analog_name">Kotlin Analog</string>
+    <string name="my_analog_name">Kotlin DSL Analog</string>
 </resources>

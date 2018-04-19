@@ -335,11 +335,11 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
              * Calculate lengths of different hands based on watch screen size.
              */
             secondHandLengthRatio =
-                    (centerX * analogWatchFaceStyle.watchFaceDimensions.secondHandLengthRatio)
+                    (centerX * analogWatchFaceStyle.watchFaceDimensions.secondHandRadiusRatio)
             minuteHandLengthRatio =
-                    (centerX * analogWatchFaceStyle.watchFaceDimensions.minuteHandLengthRatio)
+                    (centerX * analogWatchFaceStyle.watchFaceDimensions.minuteHandRadiusRatio)
             hourHandLengthRatio =
-                    (centerX * analogWatchFaceStyle.watchFaceDimensions.hourHandLengthRatio)
+                    (centerX * analogWatchFaceStyle.watchFaceDimensions.hourHandRadiusRatio)
 
             /* TODO (jewalker): Add in followup CL (for background image)
             *//* Scale loaded background image (more efficient) if surface dimensions change. *//*
@@ -450,8 +450,8 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
             canvas.save()
 
             val distanceFromCenterToArm =
-                analogWatchFaceStyle.watchFaceDimensions.centerGapAndCircleRadius -
-                        analogWatchFaceStyle.watchFaceDimensions.armToCenterCircleDistance
+                analogWatchFaceStyle.watchFaceDimensions.innerCircleRadius -
+                        analogWatchFaceStyle.watchFaceDimensions.innerCircleToArmsDistance
 
             canvas.rotate(hoursRotation, centerX, centerY)
             canvas.drawLine(
@@ -488,7 +488,7 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
             canvas.drawCircle(
                     centerX,
                     centerY,
-                    analogWatchFaceStyle.watchFaceDimensions.centerGapAndCircleRadius,
+                    analogWatchFaceStyle.watchFaceDimensions.innerCircleRadius,
                     tickAndCirclePaint
             )
 
