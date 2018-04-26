@@ -449,14 +449,14 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
              */
             canvas.save()
 
-            val distanceFromCenterToArm =
-                analogWatchFaceStyle.watchFaceDimensions.innerCircleRadius -
+            val distanceFromCenterToArms =
+                analogWatchFaceStyle.watchFaceDimensions.innerCircleRadius +
                         analogWatchFaceStyle.watchFaceDimensions.innerCircleToArmsDistance
 
             canvas.rotate(hoursRotation, centerX, centerY)
             canvas.drawLine(
                     centerX,
-                    centerY - distanceFromCenterToArm,
+                    centerY - distanceFromCenterToArms,
                     centerX,
                     centerY - hourHandLengthRatio,
                     hourPaint
@@ -465,7 +465,7 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
             canvas.rotate(minutesRotation - hoursRotation, centerX, centerY)
             canvas.drawLine(
                     centerX,
-                    centerY - distanceFromCenterToArm,
+                    centerY - distanceFromCenterToArms,
                     centerX,
                     centerY - minuteHandLengthRatio,
                     minutePaint
@@ -479,7 +479,7 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
                 canvas.rotate(secondsRotation - minutesRotation, centerX, centerY)
                 canvas.drawLine(
                         centerX,
-                        centerY - distanceFromCenterToArm,
+                        centerY - distanceFromCenterToArms,
                         centerX,
                         centerY - secondHandLengthRatio,
                         secondPaint
