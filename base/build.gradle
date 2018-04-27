@@ -21,13 +21,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion rootProject.compileSdkVersion
     defaultConfig {
         applicationId "com.example.android.watchface.watchfacekotlin"
-        minSdkVersion 26
-        targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
         multiDexEnabled true
     }
     buildTypes {
@@ -40,12 +40,14 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.google.android.support:wearable:2.3.0'
-    implementation 'com.google.android.gms:play-services-wearable:12.0.1'
-    implementation 'com.android.support:percent:27.1.1'
-    implementation 'com.android.support:support-v4:27.1.1'
-    implementation 'com.android.support:recyclerview-v7:27.1.1'
-    implementation 'com.android.support:palette-v7:27.1.1'
-    compileOnly 'com.google.android.wearable:wearable:2.3.0'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.google.android.gms:play-services-wearable:$rootProject.googlePlayServicesClientVersion"
+    implementation "com.android.support:percent:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:support-v4:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:palette-v7:$rootProject.supportLibraryVersion"
+
+    implementation "com.google.android.support:wearable:$rootProject.wearableSupportLibraryVersion"
+    compileOnly "com.google.android.wearable:wearable:$rootProject.wearableSupportLibraryVersion"
 }

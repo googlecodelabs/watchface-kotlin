@@ -33,13 +33,10 @@ data class AnalogWatchFaceStyle(
 
 /**
  * Represents all colors associated with watch face:
- * <ul>
- *   <li>main - hour hand, minute hand, and mark colors</li>
- *   <li>highlight - second hand color</li>
- *   <li>background - background color</li>
- *   <li>shadow - shadow color beneath all hands and ticks.</li>
- *   <li>one</li>
- * <ul>
+ * - main - hour hand, minute hand, and mark colors
+ * - highlight - second hand color
+ * - background - background color
+ * - shadow - shadow color beneath all hands and ticks.
  */
 data class WatchFaceColors(
     val main:Int,
@@ -49,21 +46,19 @@ data class WatchFaceColors(
 
 /**
  * Represents dimensions of objects within the watch face:
- * <ul>
- *   <li>hourHandRadiusRatio - Hour hand length as a ratio of the device's radius (range from
- *   0.0 to 1.0).</li>
- *   <li>minuteHandRadiusRatio - Minute hand length as a ratio of the device's radius (range from
- *   0.0 to 1.0).</li>
- *   <li>secondHandRadiusRatio - Second hand length as a ratio of the device's radius (range from
- *   0.0 to 1.0).</li>
- *   <li>hourHandWidth - Width of hour hand in pixels.</li>
- *   <li>minuteHandWidth - Width of minute hand in pixels.</li>
- *   <li>secondHandWidth - Width of second hand in pixels.</li>
- *   <li>shadowRadius - Length in pixels of the shadow radius around all hands and marks.</li>
- *   <li>innerCircleRadius - Radius in pixels for inner circle that all hands connect with.
- *   IMPORTANT: Should never be zero, as you don't want to burn in the center of the screen.</li>
- *   <li>innerCircleToArmsDistance - Distance in pixels from inner circle to each watch arm.</li>
- * <ul>
+ * - hourHandRadiusRatio - Hour hand length as a ratio of the device's radius (range from
+ *   0.0 to 1.0).
+ * - minuteHandRadiusRatio - Minute hand length as a ratio of the device's radius (range from
+ *   0.0 to 1.0).
+ * - secondHandRadiusRatio - Second hand length as a ratio of the device's radius (range from
+ *   0.0 to 1.0).
+ * - hourHandWidth - Width of hour hand in pixels.
+ * - minuteHandWidth - Width of minute hand in pixels.
+ * - secondHandWidth - Width of second hand in pixels.
+ * - shadowRadius - Length in pixels of the shadow radius around all hands and marks.
+ * - innerCircleRadius - Radius in pixels for inner circle that all hands connect with.
+ *   IMPORTANT: Should never be zero, as you don't want to burn in the center of the screen.
+ * - innerCircleToArmsDistance - Distance in pixels from inner circle to each watch arm.
  */
 data class WatchFaceDimensions(
     val hourHandRadiusRatio:Float,
@@ -78,10 +73,10 @@ data class WatchFaceDimensions(
 )
 
 /**
- * <p>Represents the background image resource id for a watch face, or 0 if there isn't a
+ * Represents the background image resource id for a watch face, or 0 if there isn't a
  * background image drawable.
  *
- * <p>Image is scaled to fit the device screen by width but will maintain its aspect ratio, and
+ * Image is scaled to fit the device screen by width but will maintain its aspect ratio, and
  * centered to the top of the screen.
  */
 data class WatchFaceBackgroundImage(@DrawableRes val backgroundImageResource:Int)

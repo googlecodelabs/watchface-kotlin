@@ -67,8 +67,8 @@ private const val MSG_UPDATE_TIME = 0
  * their project, you will need to set your Configurations to
  * "Do not launch Activity" for both the Wear and/or Application modules. If you
  * are unsure how to do this, please review the "Run Starter project" section
- * in the Google Watch Face Code Lab:
- * https://codelabs.developers.google.com/codelabs/watchface/index.html#0
+ * in the
+ * [Watch Face Code Lab](https://codelabs.developers.google.com/codelabs/watchface/index.html#0)
  */
 abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
 

@@ -67,7 +67,7 @@ class WatchFaceDimensionsBuilder {
             "hourHandWidth" to 5f,
             "minuteHandWidth" to 3f,
             "secondHandWidth" to 2f,
-            "shadowRadius" to 6f,
+            "shadowRadius" to 2f,
             "innerCircleRadius" to 4f,
             "innerCircleToArmsDistance" to 5f
     )
