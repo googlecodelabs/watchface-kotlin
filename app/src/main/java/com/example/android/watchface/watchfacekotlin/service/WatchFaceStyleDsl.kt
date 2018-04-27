@@ -18,6 +18,8 @@ package com.example.android.watchface.watchfacekotlin.service
 
 import android.graphics.Color
 import com.example.android.watchface.watchfacekotlin.model.AnalogWatchFaceStyle
+import com.example.android.watchface.watchfacekotlin.model.EMPTY_IMAGE_RESOURCE
+import com.example.android.watchface.watchfacekotlin.model.WatchFaceBackgroundImage
 import com.example.android.watchface.watchfacekotlin.model.WatchFaceDimensions
 import com.example.android.watchface.watchfacekotlin.model.WatchFaceColors
 
@@ -53,7 +55,7 @@ class WatchFaceColorsBuilder {
 }
 
 @WatchFaceStyleDSL
-class WatchFaceDimensionsBuilder () {
+class WatchFaceDimensionsBuilder {
 
     // Initializes defaults for fields. Non-ratio fields represent pixels, as watch faces are
     // painted from a Canvas object. Check [AnalogWatchFaceStyle] for detailed explanation of
@@ -96,11 +98,28 @@ class WatchFaceDimensionsBuilder () {
 }
 
 @WatchFaceStyleDSL
+class WatchFaceBackgroundImageBuilder {
+
+    // A background image isn't required for a watch face, so if it isn't defined in the DSL,
+    // it gets an empty image resource value which means it won't be rendered.
+    private val attributesMap: MutableMap<String, Any?> = mutableMapOf(
+            "backgroundImageResource" to EMPTY_IMAGE_RESOURCE
+    )
+
+    var backgroundImageResource:Int by attributesMap
+
+    fun build(): WatchFaceBackgroundImage {
+        return WatchFaceBackgroundImage(backgroundImageResource)
+    }
+}
+
+@WatchFaceStyleDSL
 class AnalogWatchFaceStyleBuilder {
 
-    // TODO (jewalker): Set defaults for these in case colors and/or WatchFaceDimensions aren't set.
     private var watchFaceColors: WatchFaceColors? = null
     private var watchFaceDimensions: WatchFaceDimensions? = null
+    private var watchFaceBackgroundImage: WatchFaceBackgroundImage =
+        WatchFaceBackgroundImageBuilder().build()
 
     fun watchFaceColors(setup: WatchFaceColorsBuilder.() -> Unit) {
         val watchFaceColorsBuilder = WatchFaceColorsBuilder()
@@ -114,13 +133,21 @@ class AnalogWatchFaceStyleBuilder {
         watchFaceDimensions = analogWatchFaceDimensionsBuilder.build()
     }
 
+    fun watchFaceBackgroundImage(setup: WatchFaceBackgroundImageBuilder.() -> Unit) {
+        val analogWatchFaceBackgroundImageBuilder = WatchFaceBackgroundImageBuilder()
+        analogWatchFaceBackgroundImageBuilder.setup()
+        watchFaceBackgroundImage = analogWatchFaceBackgroundImageBuilder.build()
+    }
+
+
     fun build(): AnalogWatchFaceStyle {
 
         return AnalogWatchFaceStyle(
                 watchFaceColors ?:
                     throw InstantiationException("Must define watch face styles in DSL."),
                 watchFaceDimensions ?:
-                    throw InstantiationException("Must define watch face dimensions in DSL.")
+                    throw InstantiationException("Must define watch face dimensions in DSL."),
+                watchFaceBackgroundImage
         )
     }
 

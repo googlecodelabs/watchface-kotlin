@@ -20,8 +20,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
@@ -32,6 +36,7 @@ import android.support.wearable.watchface.WatchFaceService
 import android.support.wearable.watchface.WatchFaceStyle
 import android.view.SurfaceHolder
 import com.example.android.watchface.watchfacekotlin.model.AnalogWatchFaceStyle
+import com.example.android.watchface.watchfacekotlin.model.EMPTY_IMAGE_RESOURCE
 
 import java.lang.ref.WeakReference
 import java.util.Calendar
@@ -108,12 +113,13 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
         private lateinit var tickAndCirclePaint: Paint
 
         private lateinit var backgroundPaint: Paint
+        // Best practice is to always use black for watch face in ambient mode (saves battery
+        // and prevents burn-in.
+        private val backgroundAmbientPaint:Paint = Paint().apply { color = Color.BLACK }
 
-        // TODO (jewalker): Add back in followup CL
-        /*
+        private var backgroundImageEnabled:Boolean = false
         private lateinit var backgroundBitmap: Bitmap
         private lateinit var grayBackgroundBitmap: Bitmap
-        */
 
         private var ambient: Boolean = false
         private var lowBitAmbient: Boolean = false
@@ -147,23 +153,17 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
         }
 
         private fun initializeBackground() {
-            backgroundPaint = Paint().apply {
-                color = Color.BLACK
-            }
 
-            /* TODO (jewalker): Add back in followup CL.
-            backgroundBitmap = BitmapFactory.decodeResource(resources, R.drawable.bg)
+            backgroundImageEnabled =
+                    analogWatchFaceStyle.watchFaceBackgroundImage.backgroundImageResource !=
+                    EMPTY_IMAGE_RESOURCE
 
-            *//* Extracts colors from background image to improve watchface style. *//*
-            Palette.from(backgroundBitmap).generate {
-                it.let {
-                    watchHandHighlightColor = it.getVibrantColor(Color.RED)
-                    watchHandColor = it.getLightVibrantColor(Color.WHITE)
-                    watchHandShadowColor = it.getDarkMutedColor(Color.BLACK)
-                    updateWatchHandStyle()
-                }
+            if (backgroundImageEnabled) {
+                backgroundBitmap = BitmapFactory.decodeResource(
+                        resources,
+                        analogWatchFaceStyle.watchFaceBackgroundImage.backgroundImageResource
+                )
             }
-            */
         }
 
         private fun initializeWatchFace() {
@@ -219,6 +219,10 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
                         analogWatchFaceStyle.watchFaceColors.shadow
                 )
             }
+
+            backgroundPaint = Paint().apply {
+                color = analogWatchFaceStyle.watchFaceColors.background
+            }
         }
 
         override fun onDestroy() {
@@ -268,6 +272,7 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
                 minutePaint.clearShadowLayer()
                 secondPaint.clearShadowLayer()
                 tickAndCirclePaint.clearShadowLayer()
+
             } else {
                 hourPaint.color = analogWatchFaceStyle.watchFaceColors.main
                 minutePaint.color = analogWatchFaceStyle.watchFaceColors.main
@@ -341,34 +346,33 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
             hourHandLengthRatio =
                     (centerX * analogWatchFaceStyle.watchFaceDimensions.hourHandRadiusRatio)
 
-            /* TODO (jewalker): Add in followup CL (for background image)
-            *//* Scale loaded background image (more efficient) if surface dimensions change. *//*
-            val scale = width.toFloat() / backgroundBitmap.width.toFloat()
+            if (backgroundImageEnabled) {
+                // Scale loaded background image (more efficient) if surface dimensions change.
+                val scale = width.toFloat() / backgroundBitmap.width.toFloat()
 
-            backgroundBitmap = Bitmap.createScaledBitmap(
-                    backgroundBitmap,
-                    (backgroundBitmap.width * scale).toInt(),
-                    (backgroundBitmap.height * scale).toInt(), true
-            )
+                backgroundBitmap = Bitmap.createScaledBitmap(
+                        backgroundBitmap,
+                        (backgroundBitmap.width * scale).toInt(),
+                        (backgroundBitmap.height * scale).toInt(), true
+                )
 
-            *//*
-             * Create a gray version of the image only if it will look nice on the device in
-             * ambient mode. That means we don't want devices that support burn-in
-             * protection (slight movements in pixels, not great for images going all the way to
-             * edges) and low ambient mode (degrades image quality).
-             *
-             * Also, if your watch face will know about all images ahead of time (users aren't
-             * selecting their own photos for the watch face), it will be more
-             * efficient to create a black/white version (png, etc.) and load that when you need it.
-             *//*
-            if (!burnInProtection && !lowBitAmbient) {
-                initGrayBackgroundBitmap()
+                /*
+                 * Create a gray version of the image only if it will look nice on the device in
+                 * ambient mode. That means we don't want devices that support burn-in
+                 * protection (slight movements in pixels, not great for images going all the way
+                 * to edges) and low ambient mode (degrades image quality).
+                 *
+                 * Also, if your watch face will know about all images ahead of time (users aren't
+                 * selecting their own photos for the watch face), it will be more
+                 * efficient to create a black/white version (png, etc.) and load that when
+                 * you need it.
+                 */
+                if (!burnInProtection && !lowBitAmbient) {
+                    initGrayBackgroundBitmap()
+                }
             }
-            */
         }
 
-
-        /* TODO (jewalker): Add in followup CL (background image)
         private fun initGrayBackgroundBitmap() {
             grayBackgroundBitmap = Bitmap.createBitmap(
                     backgroundBitmap.width,
@@ -383,7 +387,6 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
             grayPaint.colorFilter = filter
             canvas.drawBitmap(backgroundBitmap, 0f, 0f, grayPaint)
         }
-        */
 
         override fun onDraw(canvas: Canvas, bounds: Rect) {
             val now = System.currentTimeMillis()
@@ -396,22 +399,20 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
         private fun drawBackground(canvas: Canvas) {
 
             if (ambient && (lowBitAmbient || burnInProtection)) {
-                canvas.drawColor(Color.BLACK)
-            } else {
-                canvas.drawColor(analogWatchFaceStyle.watchFaceColors.background)
-            }
+                canvas.drawColor(backgroundAmbientPaint.color)
 
-            /* TODO (jewalker): add in followup CL
-            } else if (ambient) {
-                canvas.drawBitmap(grayBackgroundBitmap, 0f, 0f, backgroundPaint)
-            } else {
+            } else if (ambient && backgroundImageEnabled) {
+                canvas.drawBitmap(grayBackgroundBitmap, 0f, 0f, backgroundAmbientPaint)
+
+            } else if (backgroundImageEnabled) {
                 canvas.drawBitmap(backgroundBitmap, 0f, 0f, backgroundPaint)
+
+            } else {
+                canvas.drawColor(backgroundPaint.color)
             }
-            */
         }
 
         private fun drawWatchFace(canvas: Canvas) {
-
             /*
              * Draw ticks. Usually you will want to bake this directly into the photo, but in
              * cases where you want to allow users to select their own photos, this dynamically

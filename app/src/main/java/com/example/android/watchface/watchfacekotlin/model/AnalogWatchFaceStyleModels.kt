@@ -15,12 +15,17 @@
  */
 package com.example.android.watchface.watchfacekotlin.model
 
+import android.support.annotation.DrawableRes
+
+const val EMPTY_IMAGE_RESOURCE = 0
+
 /**
  * Represents all data required to style an analog watch face.
  */
 data class AnalogWatchFaceStyle(
     val watchFaceColors: WatchFaceColors,
-    val watchFaceDimensions: WatchFaceDimensions
+    val watchFaceDimensions: WatchFaceDimensions,
+    val watchFaceBackgroundImage: WatchFaceBackgroundImage
 )
 
 /**
@@ -68,3 +73,12 @@ data class WatchFaceDimensions(
     val innerCircleRadius:Float,
     val innerCircleToArmsDistance:Float
 )
+
+/**
+ * <p>Represents the background image resource id for a watch face, or 0 if there isn't a
+ * background image drawable.
+ *
+ * <p>Image is scaled to fit the device screen by width but will maintain its aspect ratio, and
+ * centered to the top of the screen.
+ */
+data class WatchFaceBackgroundImage(@DrawableRes val backgroundImageResource:Int)
