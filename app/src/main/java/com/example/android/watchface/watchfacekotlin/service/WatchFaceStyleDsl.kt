@@ -142,11 +142,15 @@ class AnalogWatchFaceStyleBuilder {
 
     fun build(): AnalogWatchFaceStyle {
 
+        val watchFaceColorsArgument = watchFaceColors ?:
+            throw IllegalStateException("Must define watch face styles in DSL.")
+
+        val watchFaceDimensionsArgument = watchFaceDimensions ?:
+            throw IllegalStateException("Must define watch face dimensions in DSL.")
+
         return AnalogWatchFaceStyle(
-                watchFaceColors ?:
-                    throw InstantiationException("Must define watch face styles in DSL."),
-                watchFaceDimensions ?:
-                    throw InstantiationException("Must define watch face dimensions in DSL."),
+                watchFaceColorsArgument,
+                watchFaceDimensionsArgument,
                 watchFaceBackgroundImage
         )
     }

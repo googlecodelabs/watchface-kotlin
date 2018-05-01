@@ -17,6 +17,9 @@ package com.example.android.watchface.watchfacekotlin.model
 
 import android.support.annotation.DrawableRes
 
+/**
+ * Used when no background image is available for watch face (renders color instead).
+ */
 const val EMPTY_IMAGE_RESOURCE = 0
 
 /**
