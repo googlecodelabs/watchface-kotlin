@@ -41,13 +41,13 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.google.android.gms:play-services-wearable:$rootProject.googlePlayServicesClientVersion"
-    implementation "com.android.support:percent:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:support-v4:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:palette-v7:$rootProject.supportLibraryVersion"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$rootProject.kotlinStdlibJdk7Version"
+    implementation "com.google.android.gms:play-services-wearable:$rootProject.playServicesWearableVersion"
+    implementation "androidx.percentlayout:percentlayout:$rootProject.androidXVersion"
+    implementation "androidx.legacy:legacy-support-v4:$rootProject.androidXVersion"
+    implementation "androidx.recyclerview:recyclerview:$rootProject.androidXVersion"
+    implementation "androidx.palette:palette:$rootProject.androidXVersion"
 
-    implementation "com.google.android.support:wearable:$rootProject.wearableSupportLibraryVersion"
-    compileOnly "com.google.android.wearable:wearable:$rootProject.wearableSupportLibraryVersion"
+    implementation "com.google.android.support:wearable:$rootProject.wearableVersion"
+    compileOnly "com.google.android.wearable:wearable:$rootProject.wearableVersion"
 }

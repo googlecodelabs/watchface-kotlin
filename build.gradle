@@ -20,28 +20,30 @@ buildscript {
     ext {
 
         // App version
-        versionName = '1.0.1'
-        versionCode = 10000
+        versionName = '1.0.2'
+        versionCode = 10002
 
         // SDK and tools
-        compileSdkVersion = 26
+        compileSdkVersion = 28
         minSdkVersion = 23
-        targetSdkVersion = 26
+        targetSdkVersion = 28
 
         // App dependencies
-        androidGradlePluginVersion = '3.2.1'
-        googlePlayServicesClientVersion = '16.0.1'
-        kotlin_version = '1.3.0'
-        supportLibraryVersion = '27.1.1'
-        wearableSupportLibraryVersion = '2.4.0'
+        gradleVersion = '3.3.2'
+        kotlinGradlePluginVersion = '1.3.21'
+
+        kotlinStdlibJdk7Version = '1.3.21'
+        playServicesWearableVersion = '16.0.1'
+        androidXVersion = '1.0.0'
+        wearableVersion = '2.4.0'
     }
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:$androidGradlePluginVersion"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.android.tools.build:gradle:$gradleVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinGradlePluginVersion"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
