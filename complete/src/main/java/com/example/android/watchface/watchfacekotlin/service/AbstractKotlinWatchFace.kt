@@ -263,10 +263,12 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
                 secondPaint.color = Color.WHITE
                 tickAndCirclePaint.color = Color.WHITE
 
-                hourPaint.isAntiAlias = false
-                minutePaint.isAntiAlias = false
-                secondPaint.isAntiAlias = false
-                tickAndCirclePaint.isAntiAlias = false
+                if (lowBitAmbient) {
+                    hourPaint.isAntiAlias = false
+                    minutePaint.isAntiAlias = false
+                    secondPaint.isAntiAlias = false
+                    tickAndCirclePaint.isAntiAlias = false
+                }
 
                 hourPaint.clearShadowLayer()
                 minutePaint.clearShadowLayer()
@@ -398,7 +400,7 @@ abstract class AbstractKotlinWatchFace : CanvasWatchFaceService() {
 
         private fun drawBackground(canvas: Canvas) {
 
-            if (ambient && (lowBitAmbient || burnInProtection)) {
+            if (ambient && burnInProtection) {
                 canvas.drawColor(backgroundAmbientPaint.color)
 
             } else if (ambient && backgroundImageEnabled) {
