@@ -18,7 +18,7 @@ Pre-requisites
 
 Getting Started
 ---------------
-Click on the [codelab](http://github.com/googlesamples/watchface-kotlin) to get started.
+Click on the [codelab](https://developer.android.com/codelabs/watchface-kotlin) to get started.
 
 Screenshots
 -----------
