@@ -5,7 +5,7 @@ Kotlin DSL.
 
 Introduction
 ------------
-[This codelab](http://github.com/googlesamples/watchface-kotlin) will show you how easy it is to
+[This codelab](https://developer.android.com/codelabs/watchface-kotlin) will show you how easy it is to
 create your own Wear OS analog watch face using Kotlin DSL (domain-specific language), and by the
 end of the codelab, you’ll have a customized watch face that you can call your own.
 
@@ -14,7 +14,7 @@ Pre-requisites
 
 <!--These should be learning materials, not software requirements; samples
     should be entirely self-contained. Format as URLs in a list.-->
-- [Codelab](http://github.com/googlesamples/watchface-kotlin)
+- [Codelab](https://developer.android.com/codelabs/watchface-kotlin)
 
 Getting Started
 ---------------
@@ -30,7 +30,7 @@ Support
 - Stack Overflow: https://stackoverflow.com/questions/tagged/wear-os
 
 If you've found an error in this sample, please file an issue:
-https://github.com/googlesamples/watchface-kotlin/issues
+https://github.com/googlecodelabs/watchface-kotlin/issues
 
 Patches are encouraged, and may be submitted by forking this project and
 submitting a pull request through GitHub.
